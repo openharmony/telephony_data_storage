@@ -26,6 +26,7 @@
 #include "config_policy_utils.h"
 #include "data_storage_errors.h"
 #include "data_storage_log_wrapper.h"
+#include "parse_json_int.h"
 #include "json/config.h"
 #include "json/reader.h"
 #include "json/value.h"
@@ -114,7 +115,14 @@ void ParserUtil::ParserPdpProfileInfos(std::vector<PdpProfile> &vec, Json::Value
         if (authTypeStr.empty()) {
             bean.authType = 0;
         } else {
-            bean.authType = atoi(authTypeStr.c_str());
+            int32_t authType = 0;
+            if (!ParseJsonInt32(authTypeStr, authType)) {
+                DATA_STORAGE_LOGE("ParserUtil::ParserPdpProfileInfos invalid auth_type: %{public}s",
+                    authTypeStr.c_str());
+                bean.authType = 0;
+            } else {
+                bean.authType = authType;
+            }
         }
         bean.mcc = itemRoot[ITEM_MCC].asString();
         bean.mnc = itemRoot[ITEM_MNC].asString();
